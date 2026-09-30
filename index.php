@@ -46,20 +46,26 @@ try {
     // Ambil string brand murni
     $brandStr = is_array($brandName) ? ($brandName['name'] ?? '') : $brandName;
 
-    // 4. Generator URL Gambar dengan Format [brand]-[model].jpg yang Konsisten
+    // 4. Generator URL Gambar dengan struktur folder model saja, tapi file gambar gabungan brand-model
     $deviceImageUrl = null;
     if (!empty($detectedModel) && !empty($brandStr)) {
         $cleanBrand = strtolower(trim(preg_replace('/[^a-zA-Z0-9]/', '', $brandStr)));
+        
+        // Slug khusus untuk folder (hanya model)
+        $slugModelOnly = strtolower(trim(preg_replace('/[^a-zA-Z0-9\-\s]/', '', $detectedModel)));
+        $slugModelOnly = preg_replace('/\s+/', '-', $slugModelOnly);
+
+        // Slug khusus untuk nama file (brand + model)
         $slugBrandAndModel = strtolower(trim(preg_replace('/[^a-zA-Z0-9\-\s]/', '', $brandStr . " " . $detectedModel)));
         $slugBrandAndModel = preg_replace('/\s+/', '-', $slugBrandAndModel);
 
-        // Pola URL: /brand/slug-lengkap/brand-slug-lengkap.jpg
-        $deviceImageUrl = "https://whatmydevice.com/data/devices/" . $cleanBrand . "/" . $slugBrandAndModel . "/" . $slugBrandAndModel . ".jpg";
+        // Susun URL: /brand/[model-saja]/[brand-model].jpg
+        $deviceImageUrl = "https://whatmydevice.com/data/devices/" . $cleanBrand . "/" . $slugModelOnly . "/" . $slugBrandAndModel . ".jpg";
     }
 
     // Fallback terakhir jika model tidak terdeteksi
     if (!$deviceImageUrl) {
-        $deviceImageUrl = "https://whatmydevice.com/data/devices/samsung/samsung-galaxy-s24-ultra/samsung-galaxy-s24-ultra.jpg";
+        $deviceImageUrl = "https://whatmydevice.com/data/devices/samsung/galaxy-s24-ultra/samsung-galaxy-s24-ultra.jpg";
     }
 
     // 5. Susun struktur data JSON
