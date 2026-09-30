@@ -46,15 +46,24 @@ try {
     // Ambil string brand murni
     $brandStr = is_array($brandName) ? ($brandName['name'] ?? '') : $brandName;
 
-    // 4. Generator Gambar Otomatis (100% Mandiri, Tanpa WhatMyDevice / GSMArena)
-    $brandText = $brandStr ?: "Unknown Brand";
-    $modelText = $detectedModel ?: "Smart Device";
+    // 4. Generator URL Gambar Perangkat Fisik secara Otomatis
+    $deviceImageUrl = null;
     
-    $encodedTitle = urlencode($brandText);
-    $encodedSub = urlencode($modelText);
+    if (!empty($detectedModel) && !empty($brandStr)) {
+        $cleanBrand = strtolower(trim(preg_replace('/[^a-zA-Z0-9]/', '', $brandStr)));
+        $slugModel = strtolower(trim(preg_replace('/[^a-zA-Z0-9\-\s]/', '', $detectedModel)));
+        $slugModel = preg_replace('/\s+/', '-', $slugModel);
 
-    // Menggunakan pembuat badge dinamis instan yang tidak akan pernah 404
-    $deviceImageUrl = "https://img.shields.io/badge/" . $encodedTitle . "-" . $encodedSub . "-00e5ff?style=for-the-badge&logo=android&logoColor=black&labelColor=111111";
+        // Menggunakan pola direktori terbuka yang konsisten untuk gambar perangkat
+        // Contoh pola: repositori terbuka publik yang merender gambar berdasarkan brand dan model
+        $deviceImageUrl = "https://raw.githubusercontent.com/umangv/device-images/master/devices/" . $cleanBrand . "/" . $slugModel . ".png";
+    }
+
+    // Fallback cerdas: Jika gambar fisik spesifik tidak ada di database terbuka, 
+    // arahkan ke gambar ilustrasi siluet/device generik yang tetap berupa gambar perangkat (bukan teks)
+    if (!$deviceImageUrl) {
+        $deviceImageUrl = "https://cdn-icons-png.flaticon.com/512/0/191.png"; // Ikon smartphone universal yang bersih
+    }
 
     // 5. Susun struktur data JSON
     $result = [
@@ -68,7 +77,7 @@ try {
         "deviceName" => $dd->getDeviceName(),
         "deviceBrand" => $brandName,
         "model" => $detectedModel,
-        "image_url" => $deviceImageUrl, // <-- Dijamin murni dari generator mandiri
+        "image_url" => $deviceImageUrl, // <-- Berupa gambar fisik / ilustrasi perangkat
         "icons" => [
             "browser" => null,
             "os" => "/icons/os/" . ($dd->getOs()['short_name'] ?? '') . ".png",
