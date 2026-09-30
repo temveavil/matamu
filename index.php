@@ -40,7 +40,35 @@ try {
     $dd = new DeviceDetector($userAgent);
     $dd->parse();
 
-    // 4. Susun struktur data JSON
+    $detectedModel = $dd->getModel();
+    $brandName = $dd->getBrandName();
+
+    // 4. Database mapping gambar perangkat (bisa diperluas atau ditarik dari database)
+    $deviceImageDatabase = [
+        "Redmi Note 14 4G" => "https://www.whatmydevice.com/images/devices/xiaomi-redmi-note-14-4g.png",
+        "Redmi Note 12 Pro 4G" => "https://www.whatmydevice.com/images/devices/xiaomi-redmi-note-12-pro-4g.png"
+    ];
+
+    // Cari gambar berdasarkan model yang terdeteksi secara persis atau parsial
+    $deviceImageUrl = null;
+    foreach ($deviceImageDatabase as $modelKey => $imageUrl) {
+        if (!empty($detectedModel) && stripos($detectedModel, $modelKey) !== false) {
+            $deviceImageUrl = $imageUrl;
+            break;
+        }
+    }
+
+    // Fallback jika model spesifik tidak ada di database mapping, tapi mengandung string "Redmi Note 14"
+    if (!$deviceImageUrl && (stripos($userAgent, "Redmi Note 14") !== false || (!empty($detectedModel) && stripos($detectedModel, "Redmi Note 14") !== false))) {
+        $deviceImageUrl = "https://www.whatmydevice.com/images/devices/xiaomi-redmi-note-14-4g.png"; // Atur default gambar seri ini
+    }
+
+    // Fallback umum jika gambar sama sekali tidak ditemukan
+    if (!$deviceImageUrl) {
+        $deviceImageUrl = "https://via.placeholder.com/150?text=" . urlencode($detectedModel ?: "Device");
+    }
+
+    // 5. Susun struktur data JSON (disertakan tambahan 'image_url')
     $result = [
         "isBot" => $dd->isBot(),
         "clientInfo" => $dd->getClient(),
@@ -50,13 +78,14 @@ try {
         "osFamily" => $dd->getOs()['family'] ?? null,
         "device" => $dd->getDevice(),
         "deviceName" => $dd->getDeviceName(),
-        "deviceBrand" => $dd->getBrandName(),
-        "model" => $dd->getModel(),
+        "deviceBrand" => $brandName,
+        "model" => $detectedModel,
+        "image_url" => $deviceImageUrl, // <-- Penambahan otomatis URL gambar perangkat
         "icons" => [
             "browser" => null,
             "os" => "/icons/os/" . ($dd->getOs()['short_name'] ?? '') . ".png",
             "device" => "/icons/devices/" . $dd->getDeviceName() . ".png",
-            "brand" => "/icons/brand/" . ($dd->getBrandName()['name'] ?? '') . ".png"
+            "brand" => "/icons/brand/" . (is_array($brandName) ? ($brandName['name'] ?? '') : $brandName) . ".png"
         ],
         "clientHints" => [
             "architecture" => "",
@@ -74,7 +103,7 @@ try {
         "userAgent" => $userAgent
     ];
 
-    // 5. Cetak output JSON
+    // 6. Cetak output JSON
     echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
 } catch (Exception $e) {
