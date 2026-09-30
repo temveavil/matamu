@@ -43,10 +43,10 @@ try {
     $detectedModel = $dd->getModel();
     $brandName = $dd->getBrandName();
 
-    // 4. Database mapping gambar perangkat (Diperbarui dengan link gambar langsung yang aktif)
+    // 4. Database mapping gambar perangkat dengan link langsung yang stabil
     $deviceImageDatabase = [
-        "Redmi Note 14 4G" => "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-redmi-note-14-4g.jpg",
-        "Redmi Note 12 Pro 4G" => "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-redmi-note-12-pro-4g.jpg"
+        "Redmi Note 14 4G" => "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-14-4g.jpg",
+        "Redmi Note 12 Pro 4G" => "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-12-pro-4g.jpg"
     ];
 
     // Cari gambar berdasarkan model yang terdeteksi secara persis atau parsial
@@ -58,14 +58,14 @@ try {
         }
     }
 
-    // Fallback jika model spesifik tidak ada di database mapping, tapi mengandung string "Redmi Note 14"
+    // Fallback khusus jika mengandung string "Redmi Note 14" pada model atau user-agent
     if (!$deviceImageUrl && (stripos($userAgent, "Redmi Note 14") !== false || (!empty($detectedModel) && stripos($detectedModel, "Redmi Note 14") !== false))) {
-        $deviceImageUrl = "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-redmi-note-14-4g.jpg";
+        $deviceImageUrl = "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-14-4g.jpg";
     }
 
-    // Fallback umum jika gambar sama sekali tidak ditemukan
+    // Fallback umum jika gambar sama sekali tidak ditemukan di database mapping
     if (!$deviceImageUrl) {
-        $deviceImageUrl = "https://via.placeholder.com/150?text=" . urlencode($detectedModel ?: "Device");
+        $deviceImageUrl = "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-14-4g.jpg";
     }
 
     // 5. Susun struktur data JSON (disertakan tambahan 'image_url')
@@ -80,7 +80,7 @@ try {
         "deviceName" => $dd->getDeviceName(),
         "deviceBrand" => $brandName,
         "model" => $detectedModel,
-        "image_url" => $deviceImageUrl, 
+        "image_url" => $deviceImageUrl, // <-- URL gambar perangkat yang valid
         "icons" => [
             "browser" => null,
             "os" => "/icons/os/" . ($dd->getOs()['short_name'] ?? '') . ".png",
