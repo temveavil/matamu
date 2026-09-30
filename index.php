@@ -42,11 +42,15 @@ try {
 
     $detectedModel = $dd->getModel();
     $brandName = $dd->getBrandName();
+    
+    // Ambil string brand murni untuk kebutuhan pencocokan URL gambar
+    $brandStr = is_array($brandName) ? ($brandName['name'] ?? '') : $brandName;
 
     // 4. Database mapping gambar perangkat dengan link langsung yang stabil
     $deviceImageDatabase = [
         "Redmi Note 14 4G" => "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-14-4g.jpg",
-        "Redmi Note 12 Pro 4G" => "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-12-pro-4g.jpg"
+        "Redmi Note 12 Pro 4G" => "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-12-pro-4g.jpg",
+        "Galaxy S24 Ultra" => "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s24-ultra-5g.jpg"
     ];
 
     // Cari gambar berdasarkan model yang terdeteksi secara persis atau parsial
@@ -58,12 +62,14 @@ try {
         }
     }
 
-    // Fallback khusus jika mengandung string "Redmi Note 14" pada model atau user-agent
-    if (!$deviceImageUrl && (stripos($userAgent, "Redmi Note 14") !== false || (!empty($detectedModel) && stripos($detectedModel, "Redmi Note 14") !== false))) {
-        $deviceImageUrl = "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-14-4g.jpg";
+    // Fallback cerdas: Jika model terdeteksi tapi tidak ada di mapping manual, buat link otomatis berbasis slug
+    if (!$deviceImageUrl && !empty($detectedModel)) {
+        $cleanBrand = strtolower(str_replace(' ', '', trim($brandStr ?: 'xiaomi')));
+        $slugModel = strtolower(str_replace(' ', '-', trim($detectedModel)));
+        $deviceImageUrl = "https://fdn2.gsmarena.com/vv/pics/" . $cleanBrand . "/" . $cleanBrand . "-" . $slugModel . ".jpg";
     }
 
-    // Fallback umum jika gambar sama sekali tidak ditemukan di database mapping
+    // Fallback terakhir jika model tidak terdeteksi sama sekali
     if (!$deviceImageUrl) {
         $deviceImageUrl = "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-14-4g.jpg";
     }
@@ -80,12 +86,12 @@ try {
         "deviceName" => $dd->getDeviceName(),
         "deviceBrand" => $brandName,
         "model" => $detectedModel,
-        "image_url" => $deviceImageUrl, // <-- URL gambar perangkat yang valid
+        "image_url" => $deviceImageUrl, // <-- URL gambar perangkat yang dinamis & akurat
         "icons" => [
             "browser" => null,
             "os" => "/icons/os/" . ($dd->getOs()['short_name'] ?? '') . ".png",
             "device" => "/icons/devices/" . $dd->getDeviceName() . ".png",
-            "brand" => "/icons/brand/" . (is_array($brandName) ? ($brandName['name'] ?? '') : $brandName) . ".png"
+            "brand" => "/icons/brand/" . $brandStr . ".png"
         ],
         "clientHints" => [
             "architecture" => "",
