@@ -46,20 +46,20 @@ try {
     // Ambil string brand murni
     $brandStr = is_array($brandName) ? ($brandName['name'] ?? '') : $brandName;
 
-    // 4. Generator URL Gambar Perangkat yang Bersih & Konsisten
+    // 4. Generator URL Gambar dengan Format [brand]-[model].jpg yang Konsisten
     $deviceImageUrl = null;
     if (!empty($detectedModel) && !empty($brandStr)) {
         $cleanBrand = strtolower(trim(preg_replace('/[^a-zA-Z0-9]/', '', $brandStr)));
-        $slugModel = strtolower(trim(preg_replace('/[^a-zA-Z0-9\-\s]/', '', $detectedModel)));
-        $slugModel = preg_replace('/\s+/', '-', $slugModel);
+        $slugBrandAndModel = strtolower(trim(preg_replace('/[^a-zA-Z0-9\-\s]/', '', $brandStr . " " . $detectedModel)));
+        $slugBrandAndModel = preg_replace('/\s+/', '-', $slugBrandAndModel);
 
-        // Menggunakan pola struktur direktori yang konsisten dan terstruktur rapi
-        $deviceImageUrl = "https://whatmydevice.com/data/devices/" . $cleanBrand . "/" . $slugModel . "/" . $slugModel . ".jpg";
+        // Pola URL: /brand/slug-lengkap/brand-slug-lengkap.jpg
+        $deviceImageUrl = "https://whatmydevice.com/data/devices/" . $cleanBrand . "/" . $slugBrandAndModel . "/" . $slugBrandAndModel . ".jpg";
     }
 
-    // Fallback terakhir jika model tidak terdeteksi sama sekali
+    // Fallback terakhir jika model tidak terdeteksi
     if (!$deviceImageUrl) {
-        $deviceImageUrl = "https://whatmydevice.com/data/devices/samsung/galaxy-s24-ultra-5g/galaxy-s24-ultra-5g.jpg";
+        $deviceImageUrl = "https://whatmydevice.com/data/devices/samsung/samsung-galaxy-s24-ultra/samsung-galaxy-s24-ultra.jpg";
     }
 
     // 5. Susun struktur data JSON
@@ -74,7 +74,7 @@ try {
         "deviceName" => $dd->getDeviceName(),
         "deviceBrand" => $brandName,
         "model" => $detectedModel,
-        "image_url" => $deviceImageUrl, // <-- URL gambar dengan struktur yang konsisten
+        "image_url" => $deviceImageUrl,
         "icons" => [
             "browser" => null,
             "os" => "/icons/os/" . ($dd->getOs()['short_name'] ?? '') . ".png",
