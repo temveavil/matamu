@@ -43,10 +43,10 @@ try {
     $detectedModel = $dd->getModel();
     $brandName = $dd->getBrandName();
 
-    // 4. Database mapping gambar perangkat (bisa diperluas atau ditarik dari database)
+    // 4. Database mapping gambar perangkat (Diperbarui dengan link gambar langsung yang aktif)
     $deviceImageDatabase = [
-        "Redmi Note 14 4G" => "https://www.whatmydevice.com/images/devices/xiaomi-redmi-note-14-4g.png",
-        "Redmi Note 12 Pro 4G" => "https://www.whatmydevice.com/images/devices/xiaomi-redmi-note-12-pro-4g.png"
+        "Redmi Note 14 4G" => "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-redmi-note-14-4g.jpg",
+        "Redmi Note 12 Pro 4G" => "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-redmi-note-12-pro-4g.jpg"
     ];
 
     // Cari gambar berdasarkan model yang terdeteksi secara persis atau parsial
@@ -60,7 +60,7 @@ try {
 
     // Fallback jika model spesifik tidak ada di database mapping, tapi mengandung string "Redmi Note 14"
     if (!$deviceImageUrl && (stripos($userAgent, "Redmi Note 14") !== false || (!empty($detectedModel) && stripos($detectedModel, "Redmi Note 14") !== false))) {
-        $deviceImageUrl = "https://www.whatmydevice.com/images/devices/xiaomi-redmi-note-14-4g.png"; // Atur default gambar seri ini
+        $deviceImageUrl = "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-redmi-note-14-4g.jpg";
     }
 
     // Fallback umum jika gambar sama sekali tidak ditemukan
@@ -80,7 +80,7 @@ try {
         "deviceName" => $dd->getDeviceName(),
         "deviceBrand" => $brandName,
         "model" => $detectedModel,
-        "image_url" => $deviceImageUrl, // <-- Penambahan otomatis URL gambar perangkat
+        "image_url" => $deviceImageUrl, 
         "icons" => [
             "browser" => null,
             "os" => "/icons/os/" . ($dd->getOs()['short_name'] ?? '') . ".png",
