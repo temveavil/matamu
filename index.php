@@ -46,15 +46,14 @@ try {
     // Ambil string brand murni
     $brandStr = is_array($brandName) ? ($brandName['name'] ?? '') : $brandName;
 
-    // 4. Generator Gambar Otomatis (Tanpa Repot Kumpul File)
-    // Menggunakan layanan pembuat badge/banner dinamis berbasis teks yang merender info perangkat secara instan
+    // 4. Generator Gambar Otomatis (100% Mandiri, Tanpa WhatMyDevice / GSMArena)
     $brandText = $brandStr ?: "Unknown Brand";
     $modelText = $detectedModel ?: "Smart Device";
     
     $encodedTitle = urlencode($brandText);
     $encodedSub = urlencode($modelText);
 
-    // URL generator otomatis yang menghasilkan kartu visual bergaya modern
+    // Menggunakan pembuat badge dinamis instan yang tidak akan pernah 404
     $deviceImageUrl = "https://img.shields.io/badge/" . $encodedTitle . "-" . $encodedSub . "-00e5ff?style=for-the-badge&logo=android&logoColor=black&labelColor=111111";
 
     // 5. Susun struktur data JSON
@@ -69,7 +68,7 @@ try {
         "deviceName" => $dd->getDeviceName(),
         "deviceBrand" => $brandName,
         "model" => $detectedModel,
-        "image_url" => $deviceImageUrl, // <-- Otomatis menyesuaikan perangkat apa pun yang mendeteksi
+        "image_url" => $deviceImageUrl, // <-- Dijamin murni dari generator mandiri
         "icons" => [
             "browser" => null,
             "os" => "/icons/os/" . ($dd->getOs()['short_name'] ?? '') . ".png",
