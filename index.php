@@ -46,23 +46,26 @@ try {
     // Ambil string brand murni
     $brandStr = is_array($brandName) ? ($brandName['name'] ?? '') : $brandName;
 
-    // 4. Generator URL Gambar Perangkat Fisik secara Otomatis
+    // 4. Generator URL Gambar dengan struktur folder model saja, tapi file gambar gabungan brand-model
     $deviceImageUrl = null;
-    
     if (!empty($detectedModel) && !empty($brandStr)) {
         $cleanBrand = strtolower(trim(preg_replace('/[^a-zA-Z0-9]/', '', $brandStr)));
-        $slugModel = strtolower(trim(preg_replace('/[^a-zA-Z0-9\-\s]/', '', $detectedModel)));
-        $slugModel = preg_replace('/\s+/', '-', $slugModel);
+        
+        // Slug khusus untuk folder (hanya model)
+        $slugModelOnly = strtolower(trim(preg_replace('/[^a-zA-Z0-9\-\s]/', '', $detectedModel)));
+        $slugModelOnly = preg_replace('/\s+/', '-', $slugModelOnly);
 
-        // Menggunakan pola direktori terbuka yang konsisten untuk gambar perangkat
-        // Contoh pola: repositori terbuka publik yang merender gambar berdasarkan brand dan model
-        $deviceImageUrl = "https://raw.githubusercontent.com/umangv/device-images/master/devices/" . $cleanBrand . "/" . $slugModel . ".png";
+        // Slug khusus untuk nama file (brand + model)
+        $slugBrandAndModel = strtolower(trim(preg_replace('/[^a-zA-Z0-9\-\s]/', '', $brandStr . " " . $detectedModel)));
+        $slugBrandAndModel = preg_replace('/\s+/', '-', $slugBrandAndModel);
+
+        // Susun URL: /brand/[model-saja]/[brand-model].jpg
+        $deviceImageUrl = "https://whatmydevice.com/data/devices/" . $cleanBrand . "/" . $slugModelOnly . "/" . $slugBrandAndModel . ".jpg";
     }
 
-    // Fallback cerdas: Jika gambar fisik spesifik tidak ada di database terbuka, 
-    // arahkan ke gambar ilustrasi siluet/device generik yang tetap berupa gambar perangkat (bukan teks)
+    // Fallback terakhir jika model tidak terdeteksi
     if (!$deviceImageUrl) {
-        $deviceImageUrl = "https://cdn-icons-png.flaticon.com/512/0/191.png"; // Ikon smartphone universal yang bersih
+        $deviceImageUrl = "https://whatmydevice.com/data/devices/samsung/galaxy-s24-ultra/samsung-galaxy-s24-ultra.jpg";
     }
 
     // 5. Susun struktur data JSON
@@ -77,7 +80,7 @@ try {
         "deviceName" => $dd->getDeviceName(),
         "deviceBrand" => $brandName,
         "model" => $detectedModel,
-        "image_url" => $deviceImageUrl, // <-- Berupa gambar fisik / ilustrasi perangkat
+        "image_url" => $deviceImageUrl,
         "icons" => [
             "browser" => null,
             "os" => "/icons/os/" . ($dd->getOs()['short_name'] ?? '') . ".png",
