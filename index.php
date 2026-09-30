@@ -46,11 +46,11 @@ try {
     // Ambil string brand murni untuk kebutuhan pencocokan URL gambar
     $brandStr = is_array($brandName) ? ($brandName['name'] ?? '') : $brandName;
 
-    // 4. Database mapping gambar perangkat dengan link langsung yang stabil
+    // 4. Database mapping gambar perangkat menggunakan direktori 'bigpic' GSMArena
     $deviceImageDatabase = [
-        "Redmi Note 14 4G" => "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-14-4g.jpg",
-        "Redmi Note 12 Pro 4G" => "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-12-pro-4g.jpg",
-        "Galaxy S24 Ultra" => "https://fdn2.gsmarena.com/vv/pics/samsung/samsung-galaxy-s24-ultra-5g.jpg"
+        "Galaxy S24 Ultra" => "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s24-ultra-5g-.jpg",
+        "Redmi Note 14 4G" => "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-redmi-note-14-4g.jpg",
+        "Redmi Note 12 Pro 4G" => "https://fdn2.gsmarena.com/vv/bigpic/xiaomi-redmi-note-12-pro-4g.jpg"
     ];
 
     // Cari gambar berdasarkan model yang terdeteksi secara persis atau parsial
@@ -62,16 +62,16 @@ try {
         }
     }
 
-    // Fallback cerdas: Jika model terdeteksi tapi tidak ada di mapping manual, buat link otomatis berbasis slug
+    // Fallback cerdas menggunakan folder 'bigpic' dan format slug otomatis
     if (!$deviceImageUrl && !empty($detectedModel)) {
-        $cleanBrand = strtolower(str_replace(' ', '', trim($brandStr ?: 'xiaomi')));
+        $cleanBrand = strtolower(str_replace(' ', '-', trim($brandStr ?: 'xiaomi')));
         $slugModel = strtolower(str_replace(' ', '-', trim($detectedModel)));
-        $deviceImageUrl = "https://fdn2.gsmarena.com/vv/pics/" . $cleanBrand . "/" . $cleanBrand . "-" . $slugModel . ".jpg";
+        $deviceImageUrl = "https://fdn2.gsmarena.com/vv/bigpic/" . $cleanBrand . "-" . $slugModel . ".jpg";
     }
 
     // Fallback terakhir jika model tidak terdeteksi sama sekali
     if (!$deviceImageUrl) {
-        $deviceImageUrl = "https://fdn2.gsmarena.com/vv/pics/xiaomi/xiaomi-redmi-note-14-4g.jpg";
+        $deviceImageUrl = "https://fdn2.gsmarena.com/vv/bigpic/samsung-galaxy-s24-ultra-5g-.jpg";
     }
 
     // 5. Susun struktur data JSON (disertakan tambahan 'image_url')
@@ -86,7 +86,7 @@ try {
         "deviceName" => $dd->getDeviceName(),
         "deviceBrand" => $brandName,
         "model" => $detectedModel,
-        "image_url" => $deviceImageUrl, // <-- URL gambar perangkat yang dinamis & akurat
+        "image_url" => $deviceImageUrl, // <-- URL gambar perangkat dengan direktori bigpic
         "icons" => [
             "browser" => null,
             "os" => "/icons/os/" . ($dd->getOs()['short_name'] ?? '') . ".png",
