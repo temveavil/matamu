@@ -46,27 +46,16 @@ try {
     // Ambil string brand murni
     $brandStr = is_array($brandName) ? ($brandName['name'] ?? '') : $brandName;
 
-    // 4. Generator URL Gambar dengan struktur folder model saja, tapi file gambar gabungan brand-model
-    $deviceImageUrl = null;
-    if (!empty($detectedModel) && !empty($brandStr)) {
-        $cleanBrand = strtolower(trim(preg_replace('/[^a-zA-Z0-9]/', '', $brandStr)));
-        
-        // Slug khusus untuk folder (hanya model)
-        $slugModelOnly = strtolower(trim(preg_replace('/[^a-zA-Z0-9\-\s]/', '', $detectedModel)));
-        $slugModelOnly = preg_replace('/\s+/', '-', $slugModelOnly);
+    // 4. Generator Gambar Otomatis (Tanpa Repot Kumpul File)
+    // Menggunakan layanan pembuat badge/banner dinamis berbasis teks yang merender info perangkat secara instan
+    $brandText = $brandStr ?: "Unknown Brand";
+    $modelText = $detectedModel ?: "Smart Device";
+    
+    $encodedTitle = urlencode($brandText);
+    $encodedSub = urlencode($modelText);
 
-        // Slug khusus untuk nama file (brand + model)
-        $slugBrandAndModel = strtolower(trim(preg_replace('/[^a-zA-Z0-9\-\s]/', '', $brandStr . " " . $detectedModel)));
-        $slugBrandAndModel = preg_replace('/\s+/', '-', $slugBrandAndModel);
-
-        // Susun URL: /brand/[model-saja]/[brand-model].jpg
-        $deviceImageUrl = "https://whatmydevice.com/data/devices/" . $cleanBrand . "/" . $slugModelOnly . "/" . $slugBrandAndModel . ".jpg";
-    }
-
-    // Fallback terakhir jika model tidak terdeteksi
-    if (!$deviceImageUrl) {
-        $deviceImageUrl = "https://whatmydevice.com/data/devices/samsung/galaxy-s24-ultra/samsung-galaxy-s24-ultra.jpg";
-    }
+    // URL generator otomatis yang menghasilkan kartu visual bergaya modern
+    $deviceImageUrl = "https://img.shields.io/badge/" . $encodedTitle . "-" . $encodedSub . "-00e5ff?style=for-the-badge&logo=android&logoColor=black&labelColor=111111";
 
     // 5. Susun struktur data JSON
     $result = [
@@ -80,7 +69,7 @@ try {
         "deviceName" => $dd->getDeviceName(),
         "deviceBrand" => $brandName,
         "model" => $detectedModel,
-        "image_url" => $deviceImageUrl,
+        "image_url" => $deviceImageUrl, // <-- Otomatis menyesuaikan perangkat apa pun yang mendeteksi
         "icons" => [
             "browser" => null,
             "os" => "/icons/os/" . ($dd->getOs()['short_name'] ?? '') . ".png",
