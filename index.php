@@ -64,9 +64,9 @@ try {
     }
 
     // Fallback terakhir jika model tidak terdeteksi
-    // DELETE ========= if (!$deviceImageUrl) {
-    //    $deviceImageUrl = "https://whatmydevice.com/data/devices/samsung/galaxy-s24-ultra/samsung-galaxy-s24-ultra.jpg";
-    //} DELETED//
+       if (!$deviceImageUrl) {
+           $deviceImageUrl = "https://whatmydevice.com/data/devices/samsung/galaxy-s24-ultra/samsung-galaxy-s24-ultra.jpg";
+       }
 
     // 5. Susun struktur data JSON
     $result = [
